@@ -1,5 +1,4 @@
-#
-# Copyright (c) 2020-present, Facebook, Inc.
+# Copyright (c) 2023-present, Meta, Inc.
 # All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+description 'Determine cookbook dependencies from cookbook metadata.rb, output to Dot language'
+needs_rules ['ExplicitMetadataDepends']
 
-if node['fb_fluentbit']['adopt_package_name_fluent-bit']
-  include_recipe 'fb_fluentbit::fluent-bit_default'
-else
-  Chef::Log.warn("On October 2nd, 2023 fb_fluentbit will adopt the fluent-bit name by default. Please upgrade your
-   version to 1.9.9 or newer and set adopt_package_name_fluent-bit to true. On April 15th, 2024 support of td-agen-bit
-   name will be dropped")
-  include_recipe 'fb_fluentbit::td-agent-bit_default'
+def to_s
+  cookbook_deps = []
+  @kb.metadatarbs.each do |x, metadata|
+    metadata['ExplicitMetadataDepends'].each do |cb|
+      cookbook_deps << [x.gsub(/:.*/, ''), cb]
+    end
+  end
+  "digraph deps {\n#{cookbook_deps.map { |arr| arr.join('->') }.join("\n")}\n}"
+end
+
+def output
+  to_s
 end
