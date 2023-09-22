@@ -21,9 +21,10 @@ jobs:
       run: bundle install
     - name: Run rspec
       run: ./scripts/run_chefspec
+    - uses: r7kamura/rubocop-problem-matchers-action@v1  # shows failures in PR
     - name: Run cookstyle
-      uses: r7kamura/rubocop-problem-matchers-action@v1  # shows failures in PR
       run: ./scripts/run_cookstyle
+
   kitchen:
     strategy:
       fail-fast: false
